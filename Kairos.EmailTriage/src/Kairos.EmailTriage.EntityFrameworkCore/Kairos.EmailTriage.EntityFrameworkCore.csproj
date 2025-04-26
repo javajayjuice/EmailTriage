@@ -1,0 +1,48 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <AssetTargetFallback>$(AssetTargetFallback);portable-net45+win8+wp8+wpa81;</AssetTargetFallback>
+    <RootNamespace>Kairos.EmailTriage</RootNamespace>
+    <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
+    <GenerateBindingRedirectsOutputType>true</GenerateBindingRedirectsOutputType>
+    <GenerateRuntimeConfigurationFiles>true</GenerateRuntimeConfigurationFiles>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Remove="Migrations\20180726102624_Upgrade_ABP_380.cs" />
+    <Compile Remove="Migrations\20180927062408_test.cs" />
+    <Compile Remove="Migrations\20190111071724_Upgraded_To_Abp_v4_1_0.cs" />
+    <Compile Remove="Migrations\20250422200332_Initial.cs" />
+    <Compile Remove="Migrations\20250422200332_Initial.Designer.cs" />
+    <Compile Remove="Migrations\20250424212352_Domain.cs" />
+    <Compile Remove="Migrations\20250424212352_Domain.Designer.cs" />
+    <Compile Remove="Migrations\20250425071304_Domain Update.cs" />
+    <Compile Remove="Migrations\20250425071304_Domain Update.Designer.cs" />
+    <Compile Remove="Migrations\20250425094909_Domain Update Feedback.cs" />
+    <Compile Remove="Migrations\20250425094909_Domain Update Feedback.Designer.cs" />
+    <Compile Remove="Migrations\20250425105818_Domain Update TrainingData.cs" />
+    <Compile Remove="Migrations\20250425105818_Domain Update TrainingData.Designer.cs" />
+    <Compile Remove="Migrations\20250425114557_Domain Update Ticket.cs" />
+    <Compile Remove="Migrations\20250425114557_Domain Update Ticket.Designer.cs" />
+    <Compile Remove="Migrations\20250425114822_Initial.cs" />
+    <Compile Remove="Migrations\20250425114822_Initial.Designer.cs" />
+    <Compile Remove="Migrations\20250425120255_FixCascadePath.cs" />
+    <Compile Remove="Migrations\20250425120255_FixCascadePath.Designer.cs" />
+    <Compile Remove="Migrations\20250425120849_Initial.cs" />
+    <Compile Remove="Migrations\20250425120849_Initial.Designer.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="Abp.HangFire.AspNetCore" Version="9.4.2" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="8.0.8" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="8.0.8">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
+    </PackageReference>
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="8.0.8">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Kairos.EmailTriage.Core\Kairos.EmailTriage.Core.csproj" />
+  </ItemGroup>
+</Project>

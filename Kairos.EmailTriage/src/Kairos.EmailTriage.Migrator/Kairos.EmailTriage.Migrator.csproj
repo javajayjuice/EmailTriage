@@ -1,0 +1,25 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <AssetTargetFallback>$(AssetTargetFallback);portable-net45+win8+wp8+wpa81;</AssetTargetFallback>
+    <AssemblyName>Kairos.EmailTriage.Migrator</AssemblyName>
+    <OutputType>Exe</OutputType>
+    <PackageId>Kairos.EmailTriage.Migrator</PackageId>
+    <GenerateAssemblyConfigurationAttribute>false</GenerateAssemblyConfigurationAttribute>
+    <GenerateAssemblyCompanyAttribute>false</GenerateAssemblyCompanyAttribute>
+    <GenerateAssemblyProductAttribute>false</GenerateAssemblyProductAttribute>
+  </PropertyGroup>
+  <ItemGroup>
+    <None Update="appsettings.json;log4net.config">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="Abp.Castle.Log4Net" Version="9.4.1" />
+    <PackageReference Include="Abp.HangFire.AspNetCore" Version="9.4.2" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Kairos.EmailTriage.Core\Kairos.EmailTriage.Core.csproj" />
+    <ProjectReference Include="..\Kairos.EmailTriage.EntityFrameworkCore\Kairos.EmailTriage.EntityFrameworkCore.csproj" />
+  </ItemGroup>
+</Project>

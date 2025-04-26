@@ -1,0 +1,30 @@
+export function debounce<F extends (...args: unknown[]) => unknown>(
+  func: F,
+  wait: number
+): (...args: Parameters<F>) => void {
+  let timeout: ReturnType<typeof setTimeout> | null = null;
+
+  return function(...args: Parameters<F>) {
+    if (timeout !== null) {
+      clearTimeout(timeout);
+    }
+    timeout = setTimeout(() => func(...args), wait);
+  };
+}
+
+export function throttle<F extends (...args: unknown[]) => unknown>(
+  func: F,
+  limit: number
+): (...args: Parameters<F>) => void {
+  let inThrottle = false;
+  
+  return function(...args: Parameters<F>) {
+    if (!inThrottle) {
+      func(...args);
+      inThrottle = true;
+      setTimeout(() => {
+        inThrottle = false;
+      }, limit);
+    }
+  };
+}
