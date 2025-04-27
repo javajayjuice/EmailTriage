@@ -1,43 +1,54 @@
 "use client";
 import { useEffect, useRef, useState } from "react";
-import { socketService } from "../apis/socket";
 import { Ticket } from "@/models";
-import { ticketApiService } from "../apis/ticket";
 import Navbar from "@/components/Navbar";
 import TicketCard from "@/components/TicketCard";
 import Toolbox from "@/components/Toolbox";
 import TimelineDot from "@/components/TimelineDot";
 import ToolboxButton from "@/components/ToolboxButton";
+import { useTicket } from "../providers/ticket/TicketContext";
+import { useSignalR } from "../providers/signalr/SignalrContext";
 
-// Timeline Component with Toolbox
 const Timeline: React.FC = () => {
-  const [tickets, setTickets] = useState<Ticket[]>([]);
   const [isToolboxOpen, setIsToolboxOpen] = useState(false);
   const lastTicketRef = useRef<HTMLDivElement | null>(null);
+  const { tickets, setTickets, getAllTickets, loading, error } = useTicket();
+  const { registerOnServerEvents, stopConnection } = useSignalR();
 
   useEffect(() => {
-    ticketApiService.getAllTickets().then((onLoadTickets: Ticket[] | undefined) => {
-      setTickets(onLoadTickets ?? []);
+    // Fetch tickets if none are loaded yet
+    if (tickets.length === 0) {
+      getAllTickets();
+    }
+
+    // Register for live ticket updates
+    const messageType = "Tickets";
+    registerOnServerEvents(messageType, (incomingTickets: Ticket[]) => {
+      console.log("SignalR ticket payload:", incomingTickets);
+
+      // Update tickets state smartly
+      setTickets((prevTickets) => {
+        const ticketMap = new Map(prevTickets.map((t) => [t.id, t]));
+
+        incomingTickets.forEach((incoming) => {
+          ticketMap.set(incoming.id!, incoming); // Overwrite if exists or add new
+        });
+
+        return Array.from(ticketMap.values());
+      });
     });
-  }, []);
+
+    // Cleanup when unmounting
+    return () => {
+      stopConnection(messageType);
+    };
+  }, [tickets, getAllTickets, registerOnServerEvents, stopConnection, setTickets]);
 
   useEffect(() => {
     if (tickets.length > 0) {
       lastTicketRef.current?.scrollIntoView({ behavior: "smooth" });
     }
   }, [tickets]);
-
-  useEffect(() => {
-    socketService.registerOnServerEvents(
-      "Tickets",
-      (payload: Ticket[]) => {
-        setTickets((prevTickets) => {
-          const newTickets = [...prevTickets, ...payload];
-          return newTickets;
-        });
-      }
-    );
-  }, []);
 
   const formatDate = (date: Date) => {
     return new Intl.DateTimeFormat("en-US", {
@@ -49,6 +60,9 @@ const Timeline: React.FC = () => {
   const toggleToolbox = () => {
     setIsToolboxOpen(!isToolboxOpen);
   };
+
+  if (loading) return <p>Loading...</p>;
+  if (error) return <p>Error: {error}</p>;
 
   return (
     <div className="relative min-h-screen">

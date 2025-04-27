@@ -3,6 +3,7 @@ import Modal from "@/components/Modal";
 import { Label, Ticket } from "@/models";
 import { labelApiService } from "@/app/apis/label";
 import { ticketApiService } from "@/app/apis/ticket";
+import { useLabel } from "@/app/providers/label/LabelContext";
 
 interface ToolboxProps {
   tickets: {
@@ -17,13 +18,12 @@ const Toolbox: React.FC<ToolboxProps> = ({ tickets }) => {
   const [subject, setSubject] = useState("");
   const [body, setBody] = useState("");
   const [label, setLabel] = useState("");
-  const [labelOptions, setLabelOptions] = useState<Label[]>([]);
   // const labelOptions = ["Tech", "Support", "Billing"]; // Example options
 
+  const { labels, getAllLabels, loading, error } = useLabel();
+
   useEffect(() => {
-    labelApiService.getAllLabels().then((onLoadTickets: Label[] | undefined) => {
-      setLabelOptions(onLoadTickets ?? []);
-    });
+    getAllLabels();
   }, []);
 
   const handleSubmit = () => {
@@ -127,7 +127,7 @@ const Toolbox: React.FC<ToolboxProps> = ({ tickets }) => {
               className="w-full border border-gray-300 rounded-lg p-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
             >
               <option value="">Select a label (optional)</option>
-              {labelOptions.map((option) => (
+              {labels.map((option) => (
                 <option key={option.id} value={option.id}>
                   {option.name}
                 </option>

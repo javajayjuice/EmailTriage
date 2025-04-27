@@ -4,25 +4,24 @@ import { useEffect, useState } from "react";
 import { Ticket } from "@/models";
 import { ticketApiService } from "../../apis/ticket";
 import Navbar from "@/components/Navbar";
+import { useTicket } from "@/app/providers/ticket/TicketContext";
 
 const TicketDetails: React.FC = () => {
   const params = useParams();
   const id = params.id as string;
-  const [ticket, setTicket] = useState<Ticket | null>(null);
-  const [loading, setLoading] = useState<boolean>(true);
-  const [error, setError] = useState<string | null>(null);
+  // const [loading, setLoading] = useState<boolean>(true);
+  // const [error, setError] = useState<string | null>(null);
+  const { loading, error, getTicketById , selectedTicket} = useTicket();
+
 
   useEffect(() => {
     const fetchTicket = async () => {
       try {
-        setLoading(true);
-        const fetchedTicket = await ticketApiService.getTicketById(id);
-        setTicket(fetchedTicket ?? null);
+        await getTicketById(id);
       } catch (err) {
-        setError("Failed to load ticket details.");
         console.error("Error fetching ticket:", err);
       } finally {
-        setLoading(false);
+        // setLoading(false);
       }
     };
 
@@ -47,7 +46,7 @@ const TicketDetails: React.FC = () => {
     );
   }
 
-  if (error || !ticket) {
+  if (error || !selectedTicket) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="bg-red-50 border border-red-200 text-red-700 px-6 py-4 rounded-lg">
@@ -71,14 +70,14 @@ const TicketDetails: React.FC = () => {
         <div className="bg-white shadow-lg rounded-lg overflow-hidden">
           {/* Header */}
           <div className="bg-blue-600 text-white p-4">
-            <h1 className="text-2xl font-bold">{ticket.subject || "No Subject"}</h1>
+            <h1 className="text-2xl font-bold">{selectedTicket.subject || "No Subject"}</h1>
             <div className="mt-2 flex flex-wrap items-center gap-4">
               <span className="text-sm opacity-90">
-                {ticket.createdAt ? `Created: ${formatDateTime(ticket.createdAt)}` : ""}
+                {selectedTicket.createdAt ? `Created: ${formatDateTime(selectedTicket.createdAt)}` : ""}
               </span>
-              {ticket.updatedAt && (
+              {selectedTicket.updatedAt && (
                 <span className="text-sm opacity-90">
-                  Updated: {formatDateTime(ticket.updatedAt)}
+                  Updated: {formatDateTime(selectedTicket.updatedAt)}
                 </span>
               )}
             </div>
@@ -88,17 +87,17 @@ const TicketDetails: React.FC = () => {
           <div className="p-6">
             {/* Label and Confidence */}
             <div className="flex flex-wrap gap-3 mb-6">
-              {ticket.label && (
+              {selectedTicket.label && (
                 <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-blue-100 text-blue-800">
-                  {ticket.label.name}
+                  {selectedTicket.label.name}
                 </span>
               )}
-              {ticket.confidenceScore !== undefined && (
+              {selectedTicket.confidenceScore !== undefined && (
                 <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-green-100 text-green-800">
-                  Confidence: {(ticket.confidenceScore * 100).toFixed(1)}%
+                  Confidence: {(selectedTicket.confidenceScore * 100).toFixed(1)}%
                 </span>
               )}
-              {ticket.isFAQ && (
+              {selectedTicket.isFAQ && (
                 <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-purple-100 text-purple-800">
                   FAQ
                 </span>
@@ -109,8 +108,8 @@ const TicketDetails: React.FC = () => {
             <div className="mb-6">
               <h2 className="text-lg font-semibold text-gray-800 mb-2">Content</h2>
               <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
-                {ticket.body ? (
-                  <p className="whitespace-pre-wrap">{ticket.body}</p>
+                {selectedTicket.body ? (
+                  <p className="whitespace-pre-wrap">{selectedTicket.body}</p>
                 ) : (
                   <p className="italic text-gray-500">No content available</p>
                 )}
@@ -118,40 +117,40 @@ const TicketDetails: React.FC = () => {
             </div>
 
             {/* Cleaned Body */}
-            {ticket.cleanedBody && (
+            {selectedTicket.cleanedBody && (
               <div className="mb-6">
                 <h2 className="text-lg font-semibold text-gray-800 mb-2">Cleaned Content</h2>
                 <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
-                  <p className="whitespace-pre-wrap">{ticket.cleanedBody}</p>
+                  <p className="whitespace-pre-wrap">{selectedTicket.cleanedBody}</p>
                 </div>
               </div>
             )}
 
             {/* Answer */}
-            {ticket.answer && (
+            {selectedTicket.answer && (
               <div className="mb-6">
                 <h2 className="text-lg font-semibold text-gray-800 mb-2">Answer</h2>
                 <div className="bg-blue-50 p-4 rounded-lg border border-blue-200">
-                  <p className="whitespace-pre-wrap">{ticket.answer}</p>
+                  <p className="whitespace-pre-wrap">{selectedTicket.answer}</p>
                 </div>
               </div>
             )}
 
             {/* Label Details */}
-            {ticket.label && (
+            {selectedTicket.label && (
               <div className="mb-6">
                 <h2 className="text-lg font-semibold text-gray-800 mb-2">Label Information</h2>
                 <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
-                  <p><span className="font-medium">Label:</span> {ticket.label.name}</p>
-                  <p><span className="font-medium">Description:</span> {ticket.label.description}</p>
+                  <p><span className="font-medium">Label:</span> {selectedTicket.label.name}</p>
+                  <p><span className="font-medium">Description:</span> {selectedTicket.label.description}</p>
                 </div>
               </div>
             )}
 
             {/* Ticket ID */}
             <div className="mt-6 text-sm text-gray-500">
-              <p>Ticket ID: {ticket.id}</p>
-              <p>Label ID: {ticket.labelId}</p>
+              <p>Ticket ID: {selectedTicket.id}</p>
+              <p>Label ID: {selectedTicket.labelId}</p>
             </div>
           </div>
 
