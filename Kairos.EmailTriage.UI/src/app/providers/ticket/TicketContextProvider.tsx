@@ -46,7 +46,7 @@ export function TicketContextProvider({ children }: Props) {
       setTickets(data.result || []);
     } catch (err: any) {
       console.error(err);
-      setError(err.message || "Unknown error");
+      setError(err.message || "Looks like you've found the doorway to the great nothing");
     } finally {
       setLoading(false);
     }
@@ -69,7 +69,7 @@ export function TicketContextProvider({ children }: Props) {
       setSelectedTicket(data.result || null);
     } catch (err: any) {
       console.error(err);
-      setError(err.message || "Unknown error");
+      setError(err.message || "Looks like you've found the doorway to the great nothing");
     } finally {
       setLoading(false);
     }
@@ -93,7 +93,7 @@ export function TicketContextProvider({ children }: Props) {
       setTickets((prev) => [...prev, data.result]);
     } catch (err: any) {
       console.error(err);
-      setError(err.message || "Unknown error");
+      setError(err.message || "Looks like you've found the doorway to the great nothing");
     } finally {
       setLoading(false);
     }
@@ -104,11 +104,14 @@ export function TicketContextProvider({ children }: Props) {
 
     setLoading(true);
     setError(null);
+    // Ensure ticket has the required properties
+    if (!ticket.labelId) throw new Error("Ticket labelId is required for update");
+    const payload: { id: string; labelId: string } = { id: ticket.id, labelId: ticket.labelId };
     try {
       const response = await fetch(`${API_URL}/UpdateTicket`, {
         method: "PUT",
         headers: getAuthHeaders(),
-        body: JSON.stringify(ticket),
+        body: JSON.stringify(payload),
       });
 
       if (!response.ok) {
@@ -123,7 +126,7 @@ export function TicketContextProvider({ children }: Props) {
       );
     } catch (err: any) {
       console.error(err);
-      setError(err.message || "Unknown error");
+      setError(err.message || "Looks like you've found the doorway to the great nothing");
     } finally {
       setLoading(false);
     }
@@ -143,6 +146,7 @@ export function TicketContextProvider({ children }: Props) {
         createTicket,
         updateTicket,
         setTickets, 
+        setSelectedTicket
       }}
     >
       {children}

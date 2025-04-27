@@ -4,7 +4,7 @@ import { createContext, useContext } from "react";
 
 interface AuthContextType {
   isAuthenticated: boolean;
-  login: (username: string, password: string) => Promise<void>;
+  login: (username: string, password: string, useRedisCache: boolean) => Promise<void>;
   logout: () => void;
 }
 

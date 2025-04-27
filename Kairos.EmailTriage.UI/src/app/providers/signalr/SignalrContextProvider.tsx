@@ -20,19 +20,25 @@ function createConnection(messageType: string): HubConnection {
 
   // Create a new connection if it doesn't exist
   console.log("SOCKET: Creating new connection for ", messageType);
+  
+  // Get token for authentication
+  const token = localStorage.getItem("token");
+  
   const connection = new HubConnectionBuilder()
-    .withUrl("https://localhost:44311/hub", { // Consider moving URL to config
+    .withUrl("https://localhost:44311/hub", {
       logger: LogLevel.Information,
-      withCredentials: false, // Adjust if authentication is needed
+      accessTokenFactory: () => token || "", // Use token for authentication
+      withCredentials: false,
     })
-    .withAutomaticReconnect()
+    .withAutomaticReconnect([0, 2000, 10000, 30000]) // Configure reconnect intervals
+    .configureLogging(LogLevel.Information)
     .build();
 
   // Store the new connection
   connections[messageType] = {
     type: messageType,
     connection: connection,
-    started: false, // Initialize as not started
+    started: false,
   };
 
   // Setup close handler to update started state
@@ -41,7 +47,14 @@ function createConnection(messageType: string): HubConnection {
     if (connections[messageType]) {
       connections[messageType].started = false;
     }
-    // Optional: Add logic here if you need to notify components about disconnection
+    
+    // Attempt to reconnect after a delay
+    setTimeout(() => {
+      if (connections[messageType]) {
+        console.log(`SOCKET: Attempting to reconnect for ${messageType}...`);
+        startConnection(messageType);
+      }
+    }, 5000);
   });
 
   return connection;
@@ -58,16 +71,30 @@ const startConnection = async (messageType: string) => {
       await connectionObj.connection.start();
       connectionObj.started = true; // Mark as started
       console.log(`SOCKET: Connection started successfully for ${messageType}. State: ${connectionObj.connection.state}`);
+      
+      // Invoke a method to join a specific group if needed
+      try {
+        await connectionObj.connection.invoke("JoinGroup", messageType);
+        console.log(`SOCKET: Joined group ${messageType}`);
+      } catch (invokeError) {
+        console.warn(`SOCKET: Error joining group ${messageType}:`, invokeError);
+        // Continue even if joining group fails
+      }
     } catch (err) {
       console.error(`SOCKET: Failed to start connection for ${messageType}: `, err);
       connectionObj.started = false; // Ensure started is false on error
-      // Optional: Implement more robust retry logic if needed
-      // Avoid immediate recursive retry which might loop indefinitely on persistent errors
-      // setTimeout(() => startConnection(messageType), 5000); // Consider exponential backoff
+      
+      // Implement exponential backoff for reconnection
+      setTimeout(() => {
+        if (connections[messageType]) {
+          console.log(`SOCKET: Attempting to reconnect for ${messageType}...`);
+          startConnection(messageType);
+        }
+      }, 5000);
     }
   } else if (connectionObj && connectionObj.connection.state !== HubConnectionState.Disconnected) {
     console.log(`SOCKET: Connection for ${messageType} is already in state: ${connectionObj.connection.state}.`);
-    // Ensure the 'started' flag reflects the actual connection state if needed
+    // Ensure the 'started' flag reflects the actual connection state
     connectionObj.started = connectionObj.connection.state === HubConnectionState.Connected;
   } else if (!connectionObj) {
     console.error(`SOCKET: Attempted to start a non-existent connection for ${messageType}.`);
@@ -120,14 +147,41 @@ function registerOnServerEvents(messageType: string, callback: (payload: any) =>
   }
 }
 
+function monitorConnectionState(messageType: string, connection: HubConnection) {
+  const states = {
+    [HubConnectionState.Disconnected]: "Disconnected",
+    [HubConnectionState.Connected]: "Connected", 
+    [HubConnectionState.Connecting]: "Connecting",
+    [HubConnectionState.Disconnecting]: "Disconnecting",
+    [HubConnectionState.Reconnecting]: "Reconnecting",
+  };
+
+  // Log state changes
+  const oldState = connection.state;
+  const interval = setInterval(() => {
+    if (connection.state !== oldState) {
+      console.log(`SOCKET: Connection state changed for ${messageType}: ${states[oldState]} -> ${states[connection.state]}`);
+      
+      // Update the stored state
+      if (connections[messageType]) {
+        connections[messageType].started = connection.state === HubConnectionState.Connected;
+      }
+    }
+  }, 1000);
+  
+  return interval;
+}
+
 export function SignalRContextProvider({ children }: Props) {
   return (
     <SignalRContext.Provider
       value={{
         registerOnServerEvents,
         stopConnection,
-        // Expose connection state if needed by components
-        // getConnectionState: (messageType: string) => connections[messageType]?.connection.state ?? HubConnectionState.Disconnected,
+        getConnectionState: (messageType: string) => 
+          connections[messageType]?.connection.state ?? HubConnectionState.Disconnected,
+        isConnected: (messageType: string) => 
+          connections[messageType]?.connection.state === HubConnectionState.Connected,
       }}
     >
       {children}

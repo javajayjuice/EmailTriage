@@ -2,28 +2,15 @@
 
 import React, { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import Navbar from '@/components/Navbar';
+import Navbar from '@/components/layout/Navbar';
 import { useAuth } from '../providers/auth/AuthContext';
+import MainLayout from '@/components/layout/MainLayout';
 
 
 const AboutPage: React.FC = () => {
-    const { isAuthenticated } = useAuth();
-    const router = useRouter();
-
-    useEffect(() => {
-        if (!isAuthenticated) {
-            router.push('/login'); // Redirect to login page if not authenticated
-        }
-    }, [isAuthenticated, router]);
-
-    // Render null or a loading indicator while checking authentication or redirecting
-    if (!isAuthenticated) {
-        return null; // Or return a loading spinner component
-    }
-
     return (
-        <div className="min-h-screen w-screen bg-gradient-to-br from-blue-100 to-indigo-200">
-            <Navbar />
+        <MainLayout>
+
             <div className=" flex items-center justify-center h-auto p-8">
                 <div className="max-w-4xl mx-auto p-8 bg-white rounded-xl shadow-lg border border-gray-100 my-auto">
                     <h1 className="text-3xl font-bold mb-4 text-gray-800">About Us</h1>
@@ -52,13 +39,7 @@ const AboutPage: React.FC = () => {
                     </ul>
                 </div>
             </div>
-            {/* Footer */}
-            <footer className="bg-blue-600 text-white py-6">
-                <div className="max-w-7xl mx-auto px-4 text-center">
-                    <p>© 2025 Your Company. All rights reserved.</p>
-                </div>
-            </footer>
-        </div>
+        </MainLayout>
     );
 };
 

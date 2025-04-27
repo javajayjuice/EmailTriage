@@ -23,11 +23,8 @@ const Navbar: React.FC = () => {
           <Link href="/" className="text-lg font-semibold hover:text-gray-200">
             Home
           </Link>
-          <Link href="/features" className="text-lg hover:text-gray-200">
-            Features
-          </Link>
-          <Link href="/pricing" className="text-lg hover:text-gray-200">
-            Pricing
+          <Link href="/tickets" className="text-lg hover:text-gray-200">
+            Tickets
           </Link>
           <Link href="/about" className="text-lg hover:text-gray-200">
             About

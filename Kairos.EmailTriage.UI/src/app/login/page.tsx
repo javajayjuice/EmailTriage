@@ -35,11 +35,13 @@ const LoginPage = () => {
         } else if (errorParam === 'session_expired') {
             setError('Your session has expired. Please log in again.');
         }
-        
+
         // Display any redirect URL for transparency
         const redirectParam = searchParams.get('redirect');
         if (redirectParam) {
             console.log('After login you will be redirected to:', decodeURIComponent(redirectParam));
+            // Use router to navigate after login if needed
+            router.push(decodeURIComponent(redirectParam));
         }
     }, [searchParams]);
 
@@ -53,11 +55,11 @@ const LoginPage = () => {
             if (!username.trim()) {
                 throw new Error('Username is required');
             }
-            
+
             if (!password) {
                 throw new Error('Password is required');
             }
-            
+
             await login(username, password, useRedisCache);
             // Login success is handled in the AuthContext
         } catch (error: any) {
@@ -69,78 +71,63 @@ const LoginPage = () => {
     };
 
     return (
-        <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-100 to-indigo-200">
-            <div className="bg-white p-8 rounded-xl shadow-lg w-full max-w-md border border-gray-100">
-                <h2 className="text-3xl font-extrabold mb-6 text-center text-gray-900">Sign In</h2>
+        <div className="h-screen flex">
+            <div className="flex w-1/2 bg-gradient-to-tr from-blue-800 to-purple-700 i justify-around items-center">
+                <div>
+                    <h1 className="text-white font-bold text-4xl font-sans">GoFinance</h1>
+                    <p className="text-white mt-1">The most popular peer to peer lending at SEA</p>
+                    <button type="button" className="block w-28 bg-white text-indigo-800 mt-4 py-2 rounded-2xl font-bold mb-2">Read More</button>
+                </div>
+            </div>
+            <div className="flex w-1/2 justify-center items-center bg-white">
+                <form className="bg-white" onSubmit={handleSubmit}>
+                    <h1 className="text-gray-800 font-bold text-2xl mb-1">Hello Again!</h1>
+                    <p className="text-sm font-normal text-gray-600 mb-7">Welcome Back</p>
 
-                {error && (
-                    <div className="mb-5 p-4 bg-red-50 text-red-800 rounded-lg border border-red-200">
-                        {error}
-                    </div>
-                )}
+                    {error && (
+                        <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative mb-4" role="alert">
+                            <span className="block sm:inline">{error}</span>
+                        </div>
+                    )}
 
-                {/* Display redirect message if present */}
-                {searchParams.get('redirect') && (
-                    <div className="mb-5 p-4 bg-blue-50 text-blue-800 rounded-lg border border-blue-200 text-sm">
-                        You'll be redirected after login
-                    </div>
-                )}
-
-                <form onSubmit={handleSubmit} className="space-y-5">
-                    <div>
-                        <label htmlFor="userNameOrEmailAddress" className="block text-sm font-semibold text-gray-700 mb-1">
-                            Username
-                        </label>
-                        <input
+                    <div className="flex items-center border-2 py-2 px-3 rounded-2xl mb-4">
+                        <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M16 12a4 4 0 10-8 0 4 4 0 008 0zm0 0v1.5a2.5 2.5 0 005 0V12a9 9 0 10-9 9m4.5-1.206a8.959 8.959 0 01-4.5 1.207" />
+                        </svg>
+                        {/* INPUT */}
+                        <input className="pl-2 outline-none border-none"
+                            placeholder="Email Address/Username"
                             type="text"
                             id="userNameOrEmailAddress"
                             value={username}
                             onChange={(e) => setUsername(e.target.value)}
-                            className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
                             required
                             autoComplete="username"
                             disabled={isLoading}
                         />
                     </div>
-
-                    <div>
-                        <label htmlFor="password" className="block text-sm font-semibold text-gray-700 mb-1">
-                            Password
-                        </label>
-                        <input
+                    <div className="flex items-center border-2 py-2 px-3 rounded-2xl">
+                        <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-gray-400" viewBox="0 0 20 20" fill="currentColor">
+                            <path fillRule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clipRule="evenodd" />
+                        </svg>
+                        {/* INPUT */}
+                        <input className="pl-2 outline-none border-none"
                             type="password"
                             id="password"
+                            placeholder="Password"
                             value={password}
                             onChange={(e) => setPassword(e.target.value)}
-                            className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
                             required
                             autoComplete="current-password"
-                            disabled={isLoading}
-                        />
+                            disabled={isLoading} />
                     </div>
-
-                    <div className="flex items-center">
-                        <input
-                            type="checkbox"
-                            id="useRedisCache"
-                            checked={useRedisCache}
-                            onChange={(e) => setUseRedisCache(e.target.checked)}
-                            className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
-                            disabled={isLoading}
-                        />
-                        <label htmlFor="useRedisCache" className="ml-2 block text-sm text-gray-700">
-                            Use Redis cache for session management
-                        </label>
-                    </div>
-
-                    <button
+                    {/* BUTTON */}
+                    <button className="block w-full bg-indigo-600 mt-4 py-2 rounded-2xl text-white font-semibold mb-2"
                         type="submit"
-                        disabled={isLoading}
-                        className="w-full bg-blue-600 text-white p-3 rounded-lg hover:bg-blue-700 disabled:bg-blue-400 transition-all hover:scale-105 disabled:scale-100 flex items-center justify-center"
-                    >
+                        disabled={isLoading}>
                         {isLoading ? (
                             <>
-                                <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white inline-block" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                                     <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                                     <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                                 </svg>
@@ -148,6 +135,19 @@ const LoginPage = () => {
                             </>
                         ) : 'Sign In'}
                     </button>
+                    <span className="text-sm ml-2 hover:text-blue-500 cursor-pointer">Forgot Password ?</span>
+
+                    <div className="mt-4">
+                        <label className="inline-flex items-center">
+                            <input
+                                type="checkbox"
+                                className="form-checkbox h-4 w-4 text-indigo-600"
+                                checked={useRedisCache}
+                                onChange={(e) => setUseRedisCache(e.target.checked)}
+                            />
+                            <span className="ml-2 text-sm text-gray-600">Use Redis Cache</span>
+                        </label>
+                    </div>
                 </form>
             </div>
         </div>

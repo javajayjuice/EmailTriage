@@ -1,33 +1,40 @@
 import React, { useEffect, useState } from "react";
-import Modal from "@/components/Modal";
-import { Label, Ticket } from "@/models";
-import { labelApiService } from "@/app/apis/label";
+import CenterModal from "@/components/modal/CenterModal";
+import { Ticket } from "@/models";
 import { ticketApiService } from "@/app/apis/ticket";
 import { useLabel } from "@/app/providers/label/LabelContext";
+import { useTicket } from "@/app/providers/ticket/TicketContext";
 
 interface ToolboxProps {
-  tickets: {
-    subject?: string;
-    label?: { name: string };
-    confidenceScore?: number;
-  }[];
+  onFilterChange?: (filteredLabelId: string) => void;
 }
 
-const Toolbox: React.FC<ToolboxProps> = ({ tickets }) => {
+const Toolbox: React.FC<ToolboxProps> = ({ onFilterChange }) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [subject, setSubject] = useState("");
   const [body, setBody] = useState("");
   const [label, setLabel] = useState("");
-  // const labelOptions = ["Tech", "Support", "Billing"]; // Example options
+  const [selectedLabelFilter, setSelectedLabelFilter] = useState("");
 
-  const { labels, getAllLabels, loading, error } = useLabel();
+  const { labels, getAllLabels } = useLabel();
+  const { tickets } = useTicket();
 
   useEffect(() => {
     getAllLabels();
-  }, []);
+  }, [getAllLabels]);
+
+  // Handle filter change
+  const handleFilterChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const labelId = e.target.value;
+    setSelectedLabelFilter(labelId);
+
+    // Call the callback function if it exists
+    if (onFilterChange) {
+      onFilterChange(labelId);
+    }
+  };
 
   const handleSubmit = () => {
-    console.log({ subject, body, label });
     const newTicket: Ticket = {
       subject,
       body,
@@ -48,7 +55,7 @@ const Toolbox: React.FC<ToolboxProps> = ({ tickets }) => {
   };
 
   return (
-    <div className="fixed left-0 top-16 h-full w-64 bg-blue-100 shadow-lg z-10 p-4">
+    <div className="absolute left-0 top-16 h-full w-64 bg-blue-100 shadow-lg z-40 p-4 overflow-y-auto">
       <h2 className="text-xl font-bold text-gray-800 mb-4">Tool Box</h2>
       <button
         onClick={() => setIsModalOpen(true)}
@@ -58,36 +65,25 @@ const Toolbox: React.FC<ToolboxProps> = ({ tickets }) => {
       </button>
       <div className="mb-4">
         <label htmlFor="filter" className="block text-gray-700 mb-2">
-          Dropdown Filter Tickets
+          Filter Tickets by Label
         </label>
         <select
           id="filter"
           className="w-full border border-gray-300 rounded-lg p-2"
-          defaultValue=""
+          value={selectedLabelFilter}
+          onChange={handleFilterChange}
         >
-          <option value="" disabled>
-            Select a filter
-          </option>
-          <option value="tech">Tech</option>
-          <option value="support">Support</option>
+          <option value="">All Labels</option>
+          {labels.map((label) => (
+            <option key={label.id} value={label.id}>
+              {label.name}
+            </option>
+          ))}
         </select>
       </div>
-      <ul className="space-y-2">
-        {tickets.map((ticket, index) => (
-          <li key={index} className="text-gray-700">
-            <span className="block font-medium">{ticket.subject || "No Subject"}</span>
-            <span className="text-sm text-gray-500">{ticket.label?.name || "No Label"}</span>
-            {ticket.confidenceScore !== undefined && (
-              <span className="block text-sm text-green-600">
-                Score: {(ticket.confidenceScore * 100).toFixed(1)}%
-              </span>
-            )}
-          </li>
-        ))}
-      </ul>
 
       {/* Modal for Creating a Ticket */}
-      <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)}>
+      <CenterModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)}>
         <h2 className="text-xl font-bold mb-4 text-gray-800">Create New Ticket</h2>
         <div className="space-y-4">
           <div>
@@ -149,7 +145,7 @@ const Toolbox: React.FC<ToolboxProps> = ({ tickets }) => {
             Create
           </button>
         </div>
-      </Modal>
+      </CenterModal>
     </div>
   );
 };

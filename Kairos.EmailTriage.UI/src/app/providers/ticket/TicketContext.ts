@@ -13,6 +13,7 @@ interface TicketContextType {
   createTicket: (ticket: Partial<Ticket>) => Promise<void>;
   updateTicket: (ticket: Ticket) => Promise<void>;
   setTickets: Dispatch<SetStateAction<Ticket[]>>; // Expose setTickets
+  setSelectedTicket: Dispatch<SetStateAction<Ticket | null>>; // Expose setSelectedTicket
 }
 
 export const TicketContext = createContext<TicketContextType>({
@@ -25,6 +26,7 @@ export const TicketContext = createContext<TicketContextType>({
   createTicket: async () => {},
   updateTicket: async () => {},
   setTickets: () => {}, // Default no-op function
+  setSelectedTicket: () => {}, // Default no-op function  
 });
 
 export const useTicket = () => useContext(TicketContext);

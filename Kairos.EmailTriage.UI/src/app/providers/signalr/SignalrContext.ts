@@ -1,16 +1,18 @@
-"use client";
-
 import { createContext, useContext } from "react";
-import { Ticket } from "@/models";
+import { HubConnectionState } from "@microsoft/signalr";
 
 interface SignalRContextType {
-  registerOnServerEvents: (messageType: string, callback: (payload: Ticket[]) => void) => void;
+  registerOnServerEvents: (messageType: string, callback: (payload: any) => void) => void;
   stopConnection: (messageType: string) => void;
+  getConnectionState: (messageType: string) => HubConnectionState;
+  isConnected: (messageType: string) => boolean;
 }
 
 export const SignalRContext = createContext<SignalRContextType>({
-  registerOnServerEvents: () => { throw new Error("Function not implemented."); },
-  stopConnection: () => { throw new Error("Function not implemented."); },
+  registerOnServerEvents: () => {},
+  stopConnection: () => {},
+  getConnectionState: () => HubConnectionState.Disconnected,
+  isConnected: () => false,
 });
 
 export const useSignalR = () => useContext(SignalRContext);
