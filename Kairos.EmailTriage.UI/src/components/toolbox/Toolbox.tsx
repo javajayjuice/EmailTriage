@@ -3,7 +3,6 @@ import CenterModal from "@/components/modal/CenterModal";
 import { Ticket } from "@/models";
 import { ticketApiService } from "@/app/apis/ticket";
 import { useLabel } from "@/app/providers/label/LabelContext";
-import { useTicket } from "@/app/providers/ticket/TicketContext";
 
 interface ToolboxProps {
   onFilterChange?: (filteredLabelId: string) => void;
@@ -16,12 +15,20 @@ const Toolbox: React.FC<ToolboxProps> = ({ onFilterChange }) => {
   const [label, setLabel] = useState("");
   const [selectedLabelFilter, setSelectedLabelFilter] = useState("");
 
-  const { labels, getAllLabels } = useLabel();
-  const { tickets } = useTicket();
+  // Track whether we've already loaded labels
+  const [labelsLoaded, setLabelsLoaded] = useState(false);
 
+  // Get labels from context - notice we're now destructuring the loading state too
+  const { labels, getAllLabels, loading } = useLabel();
+
+  // Only fetch labels once, when the component mounts
   useEffect(() => {
-    getAllLabels();
-  }, [getAllLabels]);
+    // Only call getAllLabels if we haven't loaded them yet and they're not already loading
+    if (!labelsLoaded && !loading && labels.length === 0) {
+      getAllLabels();
+      setLabelsLoaded(true);
+    }
+  }, [getAllLabels, labels.length, labelsLoaded, loading]);
 
   // Handle filter change
   const handleFilterChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
@@ -72,6 +79,7 @@ const Toolbox: React.FC<ToolboxProps> = ({ onFilterChange }) => {
           className="w-full border border-gray-300 rounded-lg p-2"
           value={selectedLabelFilter}
           onChange={handleFilterChange}
+          disabled={loading} // Disable while loading
         >
           <option value="">All Labels</option>
           {labels.map((label) => (
@@ -80,6 +88,7 @@ const Toolbox: React.FC<ToolboxProps> = ({ onFilterChange }) => {
             </option>
           ))}
         </select>
+        {loading && <p className="text-sm text-gray-500 mt-1">Loading labels...</p>}
       </div>
 
       {/* Modal for Creating a Ticket */}
