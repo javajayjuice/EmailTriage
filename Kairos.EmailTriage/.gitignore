@@ -259,8 +259,8 @@ src/Kairos.EmailTriage.Migrator/secrets.json
 .vs/
 obj/
 bin/
-aspnet-core/src/Kairos.EmailTriage.Web.Host/App_Data/Logs/
-aspnet-core/src/Kairos.EmailTriage.Web.Mvc/App_Data/Logs/
-aspnet-core/src/Kairos.EmailTriage.Migrator/Logs/Logs.txt
-aspnet-core/build/outputs/
-aspnet-core/docker/mvc/Mvc-Logs/
+src/Kairos.EmailTriage.Web.Host/App_Data/Logs/
+src/Kairos.EmailTriage.Web.Mvc/App_Data/Logs/
+src/Kairos.EmailTriage.Migrator/Logs/Logs.txt
+build/outputs/
+docker/mvc/Mvc-Logs/

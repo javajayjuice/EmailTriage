@@ -1,2 +1,4 @@
 .qodo
 appsettings.json
+*.log
+Log.txt
