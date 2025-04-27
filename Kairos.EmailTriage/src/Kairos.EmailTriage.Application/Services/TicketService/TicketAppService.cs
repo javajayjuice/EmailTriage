@@ -126,6 +126,8 @@ namespace Kairos.EmailTriage.Services.TicketService
             return "success";
         }
 
+
+
         /// <summary>
         /// Triggers ticket classification manually.
         /// </summary>
@@ -133,6 +135,32 @@ namespace Kairos.EmailTriage.Services.TicketService
         public async Task<string> ClassifyTicketsAsync()
         {
             throw new NotImplementedException();
+        }
+
+        /// <summary>
+        /// Updates an existing ticket.
+        /// </summary>
+        /// <param name="id">The ID of the ticket to update.</param>
+        /// <param name="input">The updated ticket data.</param>
+        /// <returns>The updated ticket.</returns>
+        /// <exception cref="Exception">Thrown when the ticket is not found.</exception>
+        public async Task<Ticket> UpdateTicketAsync(UpdateTicketInput input)
+        {
+            var ticket = await _ticketRepo.FirstOrDefaultAsync(t => t.Id == input.Id);
+            if (ticket == null)
+            {
+                throw new Exception($"Ticket with ID {input.Id} not found.");
+            }
+            var label = await _labelRepo.FirstOrDefaultAsync(l => l.Id == input.LabelId);
+
+            ticket.Label = label;
+            ticket.LabelId = label.Id;
+            ticket.ConfidenceScore = null;
+
+            await _ticketRepo.UpdateAsync(ticket);
+            await _cacheManager.GetCache("TicketCache").RemoveAsync(AllTicketsCacheKey);
+
+            return ticket;
         }
     }
 }

@@ -20,4 +20,11 @@ namespace Kairos.EmailTriage.Services.TicketService.Dtos
         public bool? IsFAQ { get; set; }
         public string? Answer { get; set; }
     }
+
+    [AutoMapTo(typeof(Ticket))]
+    public class UpdateTicketInput
+    {
+        public Guid? Id { get; set; }
+        public Guid? LabelId { get; set; }
+    }
 }

@@ -16,7 +16,7 @@ using System.Threading.Tasks;
 
 namespace Kairos.EmailTriage.Services.TicketService
 {
-    public class TicketEventHandler : IAsyncEventHandler<EntityCreatedEventData<Ticket>>, IAsyncEventHandler<EntityUpdatedEventData<Ticket>>, ITransientDependency
+    public class TicketEventHandler : IAsyncEventHandler<EntityUpdatedEventData<Ticket>>, ITransientDependency
     {
         protected readonly IHubContext<ClientHub> _hubContext;
         private readonly IUnitOfWorkManager _unitOfWorkManager;
@@ -37,57 +37,26 @@ namespace Kairos.EmailTriage.Services.TicketService
         }
 
         [UnitOfWork]
-        public async Task HandleEventAsync(EntityCreatedEventData<Ticket> eventData)
-        {
-            try
-            {
-                using (var uow = _unitOfWorkManager.Begin())
-                {
-                    // Get all tickets including the new one
-                    var ticketRepo = _iocManager.Resolve<IRepository<Ticket, Guid>>();
-                    var tickets = await ticketRepo.GetAllListAsync();
-
-                    // Update Redis cache with all tickets
-                    var ticketsJson = JsonSerializer.Serialize(tickets);
-                    var cacheOptions = new DistributedCacheEntryOptions
-                    {
-                        AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(30)
-                    };
-                    await _distributedCache.SetStringAsync(TicketsCacheKey, ticketsJson, cacheOptions);
-
-                    // Notify all clients about the updated tickets
-                    await _hubContext.Clients.All.SendAsync("Tickets", tickets);
-
-                    await uow.CompleteAsync();
-                }
-            }
-            catch (Exception ex)
-            {
-                throw new Exception($"Failed to handle ticket creation event: {ex.Message}", ex);
-            }
-        }
-
-        [UnitOfWork]
         public async Task HandleEventAsync(EntityUpdatedEventData<Ticket> eventData)
         {
             try
             {
                 using (var uow = _unitOfWorkManager.Begin())
                 {
-                    // Get all tickets including the updated one
                     var ticketRepo = _iocManager.Resolve<IRepository<Ticket, Guid>>();
-                    var tickets = await ticketRepo.GetAllListAsync();
+                    var labelRepo = _iocManager.Resolve<IRepository<Label, Guid>>();
+                    var ticket = await ticketRepo.FirstOrDefaultAsync(t => t.Id == eventData.Entity.Id);
+                    ticket.Label = await labelRepo.GetAsync(ticket.LabelId.Value);
 
-                    // Update Redis cache with all tickets
-                    var ticketsJson = JsonSerializer.Serialize(tickets);
+                    var ticketsJson = JsonSerializer.Serialize(ticket);
                     var cacheOptions = new DistributedCacheEntryOptions
                     {
                         AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(30)
                     };
                     await _distributedCache.SetStringAsync(TicketsCacheKey, ticketsJson, cacheOptions);
 
-                    // Notify all clients about the updated tickets
-                    await _hubContext.Clients.All.SendAsync("Tickets", tickets);
+                    await _hubContext.Clients.All.SendAsync("Tickets", ticket);
+                    await _hubContext.Clients.All.SendAsync("TicketUpdated", ticket);
 
                     await uow.CompleteAsync();
                 }
