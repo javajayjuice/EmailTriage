@@ -7,7 +7,7 @@ import { isRedisCacheEnabled } from './lib/redis';
 const PUBLIC_FILE = /\.(.*)$/;
 
 // Protected routes that require authentication
-const protectedRoutes = ['/', '/tickets', '/about', '/dashboard'];
+const protectedRoutes = [ '/tickets', '/about', '/dashboard'];
 
 // Public routes that are always accessible
 const publicRoutes = ['/login', '/register', '/api/auth'];

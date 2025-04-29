@@ -8,6 +8,9 @@ using Microsoft.Extensions.Hosting;
 using System.Threading.Tasks;
 using System.Threading;
 using Abp.Threading.BackgroundWorkers;
+using Abp.Dependency;
+using Kairos.EmailTriage.Services;
+using Kairos.EmailTriage.Abstracts;
 
 namespace Kairos.EmailTriage.Web.Host.Startup
 {
@@ -36,6 +39,10 @@ namespace Kairos.EmailTriage.Web.Host.Startup
 
             var backgroundWorkerManager = IocManager.Resolve<IBackgroundWorkerManager>();
             backgroundWorkerManager.Add(IocManager.Resolve<EmailBackgroundWorkerAdapter>());
+            //IocManager.Register<GoogleController>(DependencyLifeStyle.Transient);
+            IocManager.Register<IAccountService, AccountService>(DependencyLifeStyle.Transient);
+            IocManager.Register<IUserRepository>(DependencyLifeStyle.Transient);
+            IocManager.Register<IAuthTokenProcessor>(DependencyLifeStyle.Transient);
         }
     }
 }

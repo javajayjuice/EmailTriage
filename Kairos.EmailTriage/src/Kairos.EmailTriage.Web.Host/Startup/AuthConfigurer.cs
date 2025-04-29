@@ -7,6 +7,9 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.IdentityModel.Tokens;
 using Abp.Runtime.Security;
+using Kairos.EmailTriage.Configuration;
+using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Authentication.Google;
 
 namespace Kairos.EmailTriage.Web.Host.Startup
 {
@@ -48,6 +51,13 @@ namespace Kairos.EmailTriage.Web.Host.Startup
                     {
                         OnMessageReceived = QueryStringTokenResolver
                     };
+                }).AddCookie().AddGoogle(options =>
+                {
+                    options.ClientId = configuration["Google:Client"];
+                    options.ClientSecret = configuration["Google:Key"];
+                    options.SignInScheme = CookieAuthenticationDefaults.AuthenticationScheme;
+                    options.CallbackPath = "/signin-google";
+                    options.SaveTokens = true;
                 });
             }
         }

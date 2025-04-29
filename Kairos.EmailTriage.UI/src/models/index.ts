@@ -1,6 +1,6 @@
 
 export type Ticket = {
-    createdAt?: Date;
+    creationTime?: Date;
     id?: string;
     subject?: string;
     body?: string;

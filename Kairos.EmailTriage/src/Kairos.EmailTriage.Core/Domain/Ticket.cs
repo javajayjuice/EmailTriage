@@ -20,7 +20,7 @@ namespace Kairos.EmailTriage.Domain
         public float? ConfidenceScore { get; set; }
         public bool? IsFAQ { get; set; }
         public string? Answer { get; set; }
-        public DateTime? CreatedAt { get; set; }
+        //public DateTime? CreatedAt { get; set; }
         public DateTime? UpdatedAt { get; set; }
     }
 }

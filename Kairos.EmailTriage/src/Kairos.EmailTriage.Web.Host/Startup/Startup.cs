@@ -31,15 +31,25 @@ using Abp.Dependency;
 using System.Threading.Tasks;
 using System.Threading;
 using Abp.Domain.Uow;
+using Microsoft.AspNetCore.Authentication.Google;
+using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Identity.Data;
+using Kairos.EmailTriage.Abstracts;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Routing;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Http;
+using Kairos.EmailTriage.Authorization.Users;
+using Microsoft.AspNetCore.Authentication;
+using Kairos.EmailTriage.Services;
+
 
 namespace Kairos.EmailTriage.Web.Host.Startup
 {
     public class Startup
     {
         private const string _defaultCorsPolicyName = "localhost";
-
         private const string _apiVersion = "v1";
-
         private readonly IConfigurationRoot _appConfiguration;
         private readonly IWebHostEnvironment _hostingEnvironment;
 
@@ -60,6 +70,7 @@ namespace Kairos.EmailTriage.Web.Host.Startup
 
             IdentityRegistrar.Register(services);
             AuthConfigurer.Configure(services, _appConfiguration);
+
 
             services.AddSignalR(e =>
             {
@@ -106,6 +117,10 @@ namespace Kairos.EmailTriage.Web.Host.Startup
                 )
             );
 
+            services.AddScoped<IAccountService, AccountService>();
+            //services.AddTransient<IAuthTokenProcessor>();
+            //services.AddTransient<IUserRepository>();
+            //services.AddTransient<GoogleController>();
 
             //services.AddSingleton<EmailBackgroundJob>();
 
@@ -177,7 +192,93 @@ namespace Kairos.EmailTriage.Web.Host.Startup
                 //endpoints.MapHub<HisAdmisSignalRHub>("/signalr-utilityManDashboardHub");
                 //endpoints.MapControllers();
                 //endpoints.MapHub<SignalrAppenderHub>("/signalr-appender");
+
+                endpoints.MapPost("/api/account/register", async (Domain.RegisterRequest registerRequest, IAccountService accountService) =>
+                {
+                    try
+                    {
+                        await accountService.RegisterAsync(registerRequest);
+
+                        return Results.Ok();
+                    }
+                    catch (Exception ex)
+                    {
+                        return Results.BadRequest(ex);
+                    }
+                });
+
+                endpoints.MapPost("/api/account/login", async (Domain.LoginRequest loginRequest, IAccountService accountService) =>
+                {
+                    try
+                    {
+                        await accountService.LoginAsync(loginRequest);
+
+                        return Results.Ok();
+                    }
+                    catch (Exception ex)
+                    {
+                        return Results.BadRequest(ex);
+                    }
+                });
+
+                endpoints.MapPost("/api/account/refresh", async (HttpContext httpContext, IAccountService accountService) =>
+                {
+                    try
+                    {
+                        var refreshToken = httpContext.Request.Cookies["REFRESH_TOKEN"];
+
+                        await accountService.RefreshTokenAsync(refreshToken);
+
+                        return Results.Ok();
+                    }
+                    catch (Exception ex)
+                    {
+                        return Results.BadRequest(ex);
+                    }
+
+                });
+
+                endpoints.MapGet("/api/account/login/google", ([FromQuery] string returnUrl, LinkGenerator linkGenerator,
+                    SignInManager<User> signManager, HttpContext context) =>
+                {
+                    try
+                    {
+                        var properties = signManager.ConfigureExternalAuthenticationProperties("Google",
+                        linkGenerator.GetPathByName(context, "GoogleLoginCallback")
+                        + $"?returnUrl={returnUrl}");
+
+                        return Results.Challenge(properties, ["Google"]);
+                    }
+                    catch (Exception ex)
+                    {
+                        Console.WriteLine("Error");
+                        return Results.BadRequest(ex);
+                    }
+                });
+
+                endpoints.MapGet("/api/account/login/google/callback", async ([FromQuery] string returnUrl,
+                    HttpContext context, IAccountService accountService) =>
+                {
+                    try
+                    {
+                        var result = await context.AuthenticateAsync(GoogleDefaults.AuthenticationScheme);
+                        if (!result.Succeeded)
+                        {
+                            return Results.Unauthorized();
+                        }
+
+                        await accountService.LoginWithGoogleAsync(result.Principal);
+
+                        return Results.Redirect(returnUrl);
+                    }
+                    catch (Exception ex)
+                    {
+                        return Results.BadRequest(ex);
+                    }
+                }).WithName("GoogleLoginCallback");
             });
+
+            
 
         }
 

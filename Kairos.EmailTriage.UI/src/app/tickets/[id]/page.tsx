@@ -165,89 +165,89 @@ const TicketDetails: React.FC = () => {
   return (
 
     <>
-    <MainLayout>
+      <MainLayout>
 
-      <div className="max-w-4xl mx-auto p-6">
-        <div className="bg-white shadow-lg rounded-lg overflow-hidden">
-          {/* Header */}
-          <div className="bg-blue-600 text-white p-4">
-            <h1 className="text-2xl font-bold">{selectedTicket.subject || "No Subject"}</h1>
-            <div className="mt-2 flex flex-wrap items-center gap-4">
-              <span className="text-sm opacity-90">
-                {selectedTicket.createdAt ? `Created: ${formatDateTime(selectedTicket.createdAt)}` : ""}
-              </span>
-              {selectedTicket.updatedAt && (
+        <div className="max-w-4xl mx-auto p-6">
+          <div className="bg-white shadow-lg rounded-lg overflow-hidden">
+            {/* Header */}
+            <div className="bg-blue-600 text-white p-4">
+              <h1 className="text-2xl font-bold">{selectedTicket.subject || "No Subject"}</h1>
+              <div className="mt-2 flex flex-wrap items-center gap-4">
                 <span className="text-sm opacity-90">
-                  Updated: {formatDateTime(selectedTicket.updatedAt)}
+                  {selectedTicket.creationTime ? `Created: ${formatDateTime(selectedTicket.creationTime)}` : ""}
                 </span>
-              )}
-            </div>
-          </div>
-
-          {/* Content remains the same */}
-          <div className="p-6">
-            {/* Label and Confidence */}
-            <div className="flex flex-wrap gap-3 mb-6">
-              {selectedTicket.label && (
-                <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-blue-100 text-blue-800">
-                  {selectedTicket.label.name}
-                </span>
-              )}
-              {selectedTicket.confidenceScore !== undefined && (
-                <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-green-100 text-green-800">
-                  {selectedTicket.confidenceScore != null
-                    ? `Confidence: ${(selectedTicket.confidenceScore * 100).toFixed(1)}%`
-                    : "Agent defined"}
-                </span>
-              )}
-              {selectedTicket.isFAQ && (
-                <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-purple-100 text-purple-800">
-                  FAQ
-                </span>
-              )}
+                {selectedTicket.updatedAt && (
+                  <span className="text-sm opacity-90">
+                    Updated: {formatDateTime(selectedTicket.updatedAt)}
+                  </span>
+                )}
+              </div>
             </div>
 
-            <TicketDetailsCard ticket={selectedTicket as Required<Ticket>} formatDate={formatDate} />
+            {/* Content remains the same */}
+            <div className="p-6">
+              {/* Label and Confidence */}
+              <div className="flex flex-wrap gap-3 mb-6">
+                {selectedTicket.label && (
+                  <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-blue-100 text-blue-800">
+                    {selectedTicket.label.name}
+                  </span>
+                )}
+                {selectedTicket.confidenceScore !== undefined && (
+                  <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-green-100 text-green-800">
+                    {selectedTicket.confidenceScore != null
+                      ? `Confidence: ${(selectedTicket.confidenceScore * 100).toFixed(1)}%`
+                      : "Agent defined"}
+                  </span>
+                )}
+                {selectedTicket.isFAQ && (
+                  <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-purple-100 text-purple-800">
+                    FAQ
+                  </span>
+                )}
+              </div>
 
-            {/* Footer */}
-            <div className="border-t border-gray-200 p-4 bg-gray-50 flex justify-between items-center">
-              <button
-                onClick={() => window.history.back()}
-                className="px-4 py-2 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300"
-              >
-                Back to Timeline
-              </button>
-              <div className="flex gap-2">
+              <TicketDetailsCard ticket={selectedTicket as Required<Ticket>} formatDate={formatDate} />
+
+              {/* Footer */}
+              <div className="border-t border-gray-200 p-4 bg-gray-50 flex justify-between items-center">
                 <button
-                  className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600"
-                  onClick={handleOpenEditModal}
+                  onClick={() => window.history.back()}
+                  className="px-4 py-2 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300"
                 >
-                  Edit Label
+                  Back to Timeline
                 </button>
-                <button
-                  className="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600"
-                  onClick={() => {/* Add delete functionality */ }}
-                >
-                  Delete
-                </button>
+                <div className="flex gap-2">
+                  <button
+                    className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600"
+                    onClick={handleOpenEditModal}
+                  >
+                    Edit Label
+                  </button>
+                  <button
+                    className="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600"
+                    onClick={() => {/* Add delete functionality */ }}
+                  >
+                    Delete
+                  </button>
+                </div>
               </div>
             </div>
           </div>
         </div>
-      </div>
 
-      {/* Edit Label Modal */}
-      <CenterModal isOpen={isEditModalOpen} onClose={handleCloseEditModal}>
-        <TicketLabelUpdateModal
-          isOpen={isEditModalOpen}
-          onClose={handleCloseEditModal}
-          labels={labels}
-          labelsLoading={labelsLoading}
-          selectedTicket={selectedTicket}
-          onLabelUpdated={handleLabelUpdated}
-        />
-      </CenterModal>
-    </MainLayout>
+        {/* Edit Label Modal */}
+        <CenterModal isOpen={isEditModalOpen} onClose={handleCloseEditModal}>
+          <TicketLabelUpdateModal
+            isOpen={isEditModalOpen}
+            onClose={handleCloseEditModal}
+            labels={labels}
+            labelsLoading={labelsLoading}
+            selectedTicket={selectedTicket}
+            onLabelUpdated={handleLabelUpdated}
+          />
+        </CenterModal>
+      </MainLayout>
     </>
 
   );

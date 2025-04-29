@@ -81,7 +81,7 @@ export function AuthContextProvider({ children }: Props) {
     });
     
     setIsAuthenticated(false);
-    router.push("/login");
+    router.push("/");
   };
 
   return (

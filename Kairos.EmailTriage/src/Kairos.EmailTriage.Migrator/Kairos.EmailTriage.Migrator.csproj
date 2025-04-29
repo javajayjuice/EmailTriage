@@ -17,6 +17,7 @@
   <ItemGroup>
     <PackageReference Include="Abp.Castle.Log4Net" Version="9.4.1" />
     <PackageReference Include="Abp.HangFire.AspNetCore" Version="9.4.2" />
+    <PackageReference Include="Microsoft.AspNetCore.Authentication.Google" Version="8.0.15" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Kairos.EmailTriage.Core\Kairos.EmailTriage.Core.csproj" />

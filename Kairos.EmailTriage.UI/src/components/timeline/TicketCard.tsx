@@ -28,7 +28,7 @@ const TicketCard: React.FC<TicketCardProps> = ({ ticket, formatDate }) => {
             <div
               className="center relative inline-block select-none whitespace-nowrap rounded-full bg-purple-500 py-1 px-2 align-baseline font-sans text-xs font-medium capitalize leading-none tracking-wide text-white"
             >
-              <div className="mt-px">{formatDate(ticket.createdAt)}</div>
+              <div className="mt-px">{formatDate(ticket.creationTime)}</div>
             </div>
           </div>
         </div>
@@ -53,7 +53,7 @@ const TicketCard: React.FC<TicketCardProps> = ({ ticket, formatDate }) => {
             </span>
           )}
 
-          
+
         </div>
       </div>
     </>

@@ -4,7 +4,7 @@ interface TicketCardProps {
     ticket: {
         id: string;
         subject?: string;
-        createdAt: Date;
+        creationTime: Date;
         body?: string;
         label?: { name: string, id: string, description: string };
         confidenceScore?: number;

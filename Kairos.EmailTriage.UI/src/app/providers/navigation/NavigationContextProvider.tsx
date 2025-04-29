@@ -11,10 +11,8 @@ interface Props {
 
 const initialNavigation: NavigationItem[] = [
     { name: 'Ticket Center', href: '/tickets', current: false },
+    { name: 'Dashboard', href: '/dashboard', current: false },
     { name: 'About', href: '/about', current: false },
-    { name: 'Projects', href: '#', current: false },
-    { name: 'Calendar', href: '#', current: false },
-    { name: 'Reports', href: '#', current: false },
 ];
 
 // Base user navigation without logout handling
